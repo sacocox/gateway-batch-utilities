@@ -10,7 +10,7 @@ func getStagingUrls() map[string]string{
 
 func getProdUrls() map[string]string{
 	return map[string]string{
-		"dup-checker": "https://prod_g2-dup-checker.furyapps.io",
+		"dup-checker": "https://internal-api.mercadopago.com/g2/dup-checker",
 		"refund-read": "https://refund-read_gateway-apitransactions.furyapps.io",
 		"refund-write": "https://prod_gateway-apitransactions.furyapps.io",
 	}

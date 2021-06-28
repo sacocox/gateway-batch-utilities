@@ -7,10 +7,10 @@ import (
 )
 
 type Refund struct {
-	Id int `json:"id"`
-	Status string `json:"status"`
-	StatusDetail string `json:"status_detail"`
-	StatusDetailG2 string `json:"status_detail_g2"`
+	Id int `json:"id,omitempty"`
+	Status string `json:"status,omitempty"`
+	StatusDetail string `json:"status_detail,omitempty"`
+	StatusDetailG2 *string `json:"status_detail_g2"`
 	RetryNumber int `json:"retry_number"`
 }
 

@@ -19,11 +19,11 @@ func main() {
 
 	rs := refunds.NewRefundService(refundReadUrl, refundWriteUrl)
 
-	dupCheckerUrl := utils.GetUrl("dup-checker", scope)
+	//dupCheckerUrl := utils.GetUrl("dup-checker", scope)
 
-	dcs := dup_checker.NewDupCheckerService(dupCheckerUrl)
+	//dcs := dup_checker.NewDupCheckerService(dupCheckerUrl)
 
-	lines, err := filereader.ReadFile("cmd/deleteRefundsDupKeys/resources/deleteRefundsDupKeys_" + scope + ".txt")
+	lines, err := filereader.ReadFile("cmd/deleteDupKeysUpdateAndRetryRefund/resources/deleteDupKeysUpdateAndRetryRefund_" + scope + ".txt")
 	if err != nil {
 		return
 	}
@@ -48,7 +48,7 @@ func main() {
 
 		retryStatus :=""
 
-		if deleteRefundKey, err = deleteRefundsDupKeys(txId, refundId, dcs); err == nil {
+		//if deleteRefundKey, err = deleteRefundsDupKeys(txId, refundId, dcs); err == nil {
 			if removeStatus, err = resetRefund(txId, refundId, rs); err == nil {
 				if  retryStatus,err = retryRefund(txId,refundId,rs);err != nil{
 					retryStatus = err.Error()
@@ -56,9 +56,9 @@ func main() {
 			}else {
 				removeStatus = err.Error()
 			}
-		} else {
+		//} else {
 			deleteRefundKey = err.Error()
-		}
+		//}
 
 		result += "deleteRefundKey: " + deleteRefundKey + " " + "removeStatus: " + removeStatus + "retryStatus: " + retryStatus
 
@@ -68,7 +68,8 @@ func main() {
 }
 
 func resetRefund(txId string, refundId string, rs refunds.RefundService) (string, error) {
-	refund := refunds.Refund{RetryNumber: 0, StatusDetailG2: ""}
+
+	refund := refunds.Refund{RetryNumber: 0, StatusDetailG2:nil}
 
 	_, err := rs.UpdateRefund(txId, refundId, refund)
 
@@ -82,7 +83,7 @@ func resetRefund(txId string, refundId string, rs refunds.RefundService) (string
 
 func deleteRefundsDupKeys(txId string, refundId string, dcs dup_checker.DupCheckerService) (string, error) {
 
-	refundKeyId := txId + "-refund-" + refundId
+	refundKeyId := "int:"+txId + "-refund-" + refundId
 
 	dupCheckerKey, err := dcs.GetKey(refundKeyId)
 
