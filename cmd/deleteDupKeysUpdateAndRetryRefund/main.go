@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func main(){
+func main() {
 
 	scope := "prod"
 
@@ -19,11 +19,11 @@ func main(){
 
 	rs := refunds.NewRefundService(refundReadUrl, refundWriteUrl)
 
-	//dupCheckerUrl := utils.GetUrl("dup-checker", scope)
+	dupCheckerUrl := utils.GetUrl("dup-checker", scope)
 
-	//dcs := dup_checker.NewDupCheckerService(dupCheckerUrl)
+	dcs := dup_checker.NewDupCheckerService(dupCheckerUrl)
 
-	lines, err := filereader.ReadFile("cmd/deleteRefundsDupKeys/resources/deleteRefundsDupKeys_" + scope +".txt")
+	lines, err := filereader.ReadFile("cmd/deleteRefundsDupKeys/resources/deleteRefundsDupKeys_" + scope + ".txt")
 	if err != nil {
 		return
 	}
@@ -46,27 +46,31 @@ func main(){
 
 		removeStatus := ""
 
-		//if deleteRefundKey, err = deleteRefundsDupKeys(txId, refundId, dcs); err == nil {
-			if removeStatus, err = removeStatusDetailG2(txId, refundId, rs); err != nil {
+		retryStatus :=""
+
+		if deleteRefundKey, err = deleteRefundsDupKeys(txId, refundId, dcs); err == nil {
+			if removeStatus, err = resetRefund(txId, refundId, rs); err == nil {
+				if  retryStatus,err = retryRefund(txId,refundId,rs);err != nil{
+					retryStatus = err.Error()
+				}
+			}else {
 				removeStatus = err.Error()
 			}
-		//}else{
-			//deleteRefundKey = err.Error()
-		//}
+		} else {
+			deleteRefundKey = err.Error()
+		}
 
-		result += "deleteRefundKey: " + deleteRefundKey + " " + "removeStatus: " + removeStatus
+		result += "deleteRefundKey: " + deleteRefundKey + " " + "removeStatus: " + removeStatus + "retryStatus: " + retryStatus
 
 		fmt.Println(result)
 	}
 
 }
 
-func removeStatusDetailG2(txId string, refundId string, rs refunds.RefundService) (string, error){
+func resetRefund(txId string, refundId string, rs refunds.RefundService) (string, error) {
 	refund := refunds.Refund{RetryNumber: 0, StatusDetailG2: ""}
 
-	resp, err := rs.UpdateRefund(txId, refundId, refund)
-
-	println(resp)
+	_, err := rs.UpdateRefund(txId, refundId, refund)
 
 	if err != nil {
 
@@ -107,4 +111,14 @@ func deleteRefundsDupKeys(txId string, refundId string, dcs dup_checker.DupCheck
 	return "OK", nil
 }
 
+func retryRefund(txId string, refundId string, rs refunds.RefundService) (string, error) {
 
+	_, err := rs.RetryRefund(txId, refundId)
+
+	if err != nil {
+
+		return "", fmt.Errorf("no se pudo actualizar el key: %w", err)
+	}
+
+	return "OK", nil
+}

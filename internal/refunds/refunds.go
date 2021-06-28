@@ -17,6 +17,7 @@ type Refund struct {
 type RefundServiceI interface {
 	GetRefund(txId string, refundId string) (Refund, error)
 	UpdateRefund(txId string, refundId string, refund Refund) (string, error)
+	RetryRefund(txId string, refundId string)(string,error)
 }
 
 type RefundService struct {
@@ -34,6 +35,10 @@ func (rs RefundService) getUpdateUrl(txId string, refundId string) string{
 
 func (rs RefundService) getReadUrl(txId string, refundId string) string{
 	return rs.readUrl + "/gateway/transactions/" + txId + "/refund/" + refundId
+}
+
+func (rs RefundService) getRetryUrl(txId string, refundId string) string{
+	return rs.readUrl + "/gateway/transactions/g2/" + txId + "/refund/" + refundId+"/retry"
 }
 
 func (rs RefundService) GetRefund(txId string, refundId string) (*Refund, error){
@@ -73,4 +78,16 @@ func (rs RefundService) UpdateRefund(txId string, refundId string, refund Refund
 	}
 	return resp, nil
 
+}
+
+func (rs RefundService) RetryRefund(txId string, refundId string) (string, error) {
+
+	url := rs.getRetryUrl(txId, refundId)
+
+	resp, err := restclient.DoPost(url, nil)
+
+	if err != nil {
+		return "", errors.New("Error consumiendo el endpoint: " + err.Error())
+	}
+	return resp, nil
 }
