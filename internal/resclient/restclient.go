@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-const authHeader = "b36f90313e8d23da703f44f04b5a35824c9bd546fe67f4c272891918426a25cb"
+const authHeader = "2e974946b51a860152fa87c00250215d47449aecc2256261e8244167c80374dd"
 
 func DoGet(url string) (string, error){
 	client := &http.Client{}

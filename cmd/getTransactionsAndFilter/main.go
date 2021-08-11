@@ -7,7 +7,9 @@ import (
 	restclient "github.com/mercadolibre/gateway_batch_utilities/internal/resclient"
 	"log"
 	"os"
+	"strconv"
 	"strings"
+	"time"
 )
 
 const PROD = "production"
@@ -17,8 +19,8 @@ func main() {
 
 	scope := PROD
 	url := "https://prod_gateway-apitransactions.furyapps.io/gateway/transactions/g2/%s"
-	expression := ""
-	fileNameResultPath := "trx_filtered.txt"
+	expression := "channel_transport_certificate_x509_keypair_error"
+	fileName:= strconv.FormatInt(time.Now().Unix(), 10)
 
 	lines, err := filereader.ReadFile(fmt.Sprintf("cmd/getTransactionsAndFilter/resources/%s/transactions.txt", scope))
 	if err != nil {
@@ -26,7 +28,7 @@ func main() {
 	}
 
 	for n, line := range lines {
-		fmt.Printf("Filtering trx in line %d", n)
+		fmt.Printf("Filtering trx in line %d \n", n)
 		resp, err := restclient.DoGet(fmt.Sprintf(url, line))
 		if err != nil {
 			fmt.Printf("Error getting transaction -> %s", err.Error())
@@ -34,7 +36,7 @@ func main() {
 
 		//do filter
 		if strings.Contains(resp, expression) {
-			appendData(fileNameResultPath, line)
+			appendData(fmt.Sprintf("cmd/getTransactionsAndFilter/resources/%s/result/%s.txt",scope,fileName), line)
 		}
 	}
 }
