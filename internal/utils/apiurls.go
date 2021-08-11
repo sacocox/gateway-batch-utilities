@@ -20,7 +20,7 @@ func GetUrl(app string, scope string) string{
 	var url = ""
 	if scope == "staging" {
 		url, _ = getStagingUrls()[app]
-	} else if scope == "prod" {
+	} else if scope == "production" {
 		url, _ = getProdUrls()[app]
 	}
 	return url

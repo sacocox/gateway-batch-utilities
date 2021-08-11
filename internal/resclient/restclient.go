@@ -30,8 +30,6 @@ func DoGet(url string) (string, error){
 	}
 
 	defer resp.Body.Close()
-	//fmt.Println("Response status:", resp.Status)
-	//Print the first 5 lines of the response body.
 
 	if resp.StatusCode != 200 {
 		return "", errors.New("Codigo de respuesta invalido: " + resp.Status)
