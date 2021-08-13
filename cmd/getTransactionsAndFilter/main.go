@@ -18,7 +18,8 @@ const STAG = "staging"
 func main() {
 
 	scope := PROD
-	url := "https://prod_gateway-apitransactions.furyapps.io/gateway/transactions/g2/%s"
+	getURL := "https://prod_gateway-apitransactions.furyapps.io/gateway/transactions/g2/%s"
+	updateURL = "http://prod.gateway-apitransactions.melifrontends.com/gateway/transactions/%s/online_purchase"
 	expression := "channel_transport_certificate_x509_keypair_error"
 	fileName:= strconv.FormatInt(time.Now().Unix(), 10)
 
@@ -29,7 +30,7 @@ func main() {
 
 	for n, line := range lines {
 		fmt.Printf("Filtering trx in line %d \n", n)
-		resp, err := restclient.DoGet(fmt.Sprintf(url, line))
+		resp, err := restclient.DoGet(fmt.Sprintf(getURL, line))
 		if err != nil {
 			fmt.Printf("Error getting transaction -> %s", err.Error())
 		}
@@ -37,8 +38,28 @@ func main() {
 		//do filter
 		if strings.Contains(resp, expression) {
 			appendData(fmt.Sprintf("cmd/getTransactionsAndFilter/resources/%s/result/%s.txt",scope,fileName), line)
+			fmt.Printf("updating transaction -> %s \n", line)
+
+			body := RequestBody{
+				Status:       "contingency",
+				StatusDetail: "contingency-standby-certificate-error",
+			}
+
+			bodyJson, _ := json.Marshal(body)
+
+			err:= restclient.DoPut(fmt.Sprintf(updateURL, line), bodyJson)
+
+			if err != nil {
+				fmt.Println("Error triying to update the transaction %s: %s", line, err.Error())
+			}
+
 		}
 	}
+}
+
+type RequestBody struct {
+	Status       string `json:"status"`
+	StatusDetail string `json:"status_detail"`
 }
 
 func appendData(filePath, data string) {
@@ -55,3 +76,5 @@ func appendData(filePath, data string) {
 	dataWriter.Flush()
 	file.Close()
 }
+
+func 

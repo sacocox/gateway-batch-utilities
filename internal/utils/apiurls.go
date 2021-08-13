@@ -1,27 +1,30 @@
 package utils
 
-func getStagingUrls() map[string]string{
-	return map[string]string{
-		"dup-checker": "https://staging_g2-dup-checker.furyapps.io",
-		"refund-read": "https://staging_gateway-apitransactions.furyapps.io",
-		"refund-write": "https://staging_gateway-apitransactions.furyapps.io",
-	}
+
+
+
+var prodURLs = map[string]string{
+	"dup-checker": "https://staging_g2-dup-checker.furyapps.io",
+	"refund-read": "https://staging_gateway-apitransactions.furyapps.io",
+	"refund-write": "https://staging_gateway-apitransactions.furyapps.io",
 }
 
-func getProdUrls() map[string]string{
-	return map[string]string{
-		"dup-checker": "https://internal-api.mercadopago.com/g2/dup-checker",
-		"refund-read": "https://refund-read_gateway-apitransactions.furyapps.io",
-		"refund-write": "https://prod_gateway-apitransactions.furyapps.io",
-	}
+var stagingURLs = map[string]string{
+	"dup-checker": "https://internal-api.mercadopago.com/g2/dup-checker",
+	"refund-read": "https://refund-read_gateway-apitransactions.furyapps.io",
+	"refund-write": "https://prod_gateway-apitransactions.furyapps.io",
 }
 
-func GetUrl(app string, scope string) string{
-	var url = ""
-	if scope == "staging" {
-		url, _ = getStagingUrls()[app]
-	} else if scope == "production" {
-		url, _ = getProdUrls()[app]
+func GetProductionURL(appName string){
+	url,ok:= prodURLs[appName]; if ok {
+		return url
 	}
-	return url
+	return ""
+}
+
+func GetStagingURL(appName string){
+	url,ok:= stagingURLs[appName]; if ok {
+		return url
+	}
+	return ""
 }

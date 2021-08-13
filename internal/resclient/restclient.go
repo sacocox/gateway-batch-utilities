@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-const authHeader = "2e974946b51a860152fa87c00250215d47449aecc2256261e8244167c80374dd"
+const furyToken = "2e974946b51a860152fa87c00250215d47449aecc2256261e8244167c80374dd"
 
 func DoGet(url string) (string, error){
 	client := &http.Client{}
@@ -21,7 +21,7 @@ func DoGet(url string) (string, error){
 		return "", err
 	}
 
-	req.Header.Add("X-Auth-Token", authHeader)
+	req.Header.Add("X-Auth-Token", furyToken)
 	resp, err := client.Do(req)
 
 	if err != nil {
@@ -48,79 +48,28 @@ func DoPost(url string, body []byte) (string, error){
 	return "", nil
 }
 
-func DoPut(url string, body []byte) (string, error){
-	// Create client
-	client := &http.Client{}
+func DoPut(url string, json string) error{
 
-	// Create request
-	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(body))
+	req, err := http.NewRequest(http.MethodPut, url, bytes.NewBuffer(json))
+
 	if err != nil {
-		fmt.Println(err)
-		return "", err
+		return fmt.Errorf("Error updating transaction ->: %s", err.Error())
 	}
-
-	req.Header.Add("Content-Type","application/json")
-	req.Header.Add("Accept","application/json")
-	req.Header.Add("X-Auth-Token", authHeader)
-
-	// Fetch Request
+	req.Header.Add("x-caller-scopes", "admin")
+	req.Header.Add("x-auth-token", furyToken)
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println(err)
-		return "", err
+		return fmt.Errorf("Error updating transaction ->: %s", err.Error())
 	}
 	defer resp.Body.Close()
-
-	// Read Response Body
 	response, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println(err)
-		return "", err
+		return fmt.Errorf("Error parsing response: %s", err.Error())
 	}
-
-	/*if resp.StatusCode != 200 {
-		return "", errors.New("Codigo de respuesta invalido: " + resp.Status)
-	}*/
-	/*var response = ""
-	scanner := bufio.NewScanner(resp.Body)
-	for i := 0; scanner.Scan(); i++ {
-		response +=  scanner.Text()
-	}*/
-	return string(response), nil
+	return nil
 }
 
 func DoDelete(url string, body []byte) error{
-
-	// Create client
-	client := &http.Client{}
-
-	// Create request
-	req, err := http.NewRequest("DELETE", url, bytes.NewBuffer(body))
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-
-	req.Header.Add("X-Auth-Token", authHeader)
-
-	// Fetch Request
-	resp, err := client.Do(req)
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-	defer resp.Body.Close()
-
-	// Read Response Body
-	_, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-
-	if resp.StatusCode != 200 {
-		return errors.New("Codigo de respuesta invalido: " + resp.Status)
-	}
 	return nil
-
 }
